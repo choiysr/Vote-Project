@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.kakarrot.dao.historyMapper">
+<select id="findVote" resultType="String">
+<![CDATA[
+select decision from tbl_his_mem
+where h_id =        
+        (select * from
+		(select h_id from tbl_his
+		where target = #{team_vo.applier}
+		and t_id = #{team_vo.t_id}
+		order by h_id desc)
+		where rownum = 1)
+and m_id = #{member_vo.m_id}
+	]]>
+</select>
+
+
+	<select id="findByHisId" resultType="string">
+		<![CDATA[
+		select * from
+		(select h_id from tbl_his
+		where target = #{applier}
+		and t_id = #{t_id}
+		order by h_id desc)
+		where rownum = 1
+		]]>
+	</select>
+
+
+	<select id="checkVote" resultType="string">
+	<![CDATA[
+		select decision, count(*)
+		from tbl_his_mem
+		where h_id = #{h_id}
+		and decision <> 'Y'
+		group by decision
+		]]>
+	</select>
+
+	<!--History insert -->
+	<insert id="insertHis">
+		INSERT INTO tbl_his (h_id, t_id, target, state)
+		VALUES(SEQ_TBL_HIS_ID.nextval, #{team_vo.t_id}, #{member_vo.m_id},'R')
+	</insert>
+
+	<!-- history member insert -->
+	<!-- 수정요망 m_id (members list 뽑아야합니다.) -->
+	<insert id="insertHisMem">
+		INSERT INTO tbl_his_mem
+		VALUES(SEQ_TBL_HIS_ID.currval,#{member_vo.m_id},'R')
+	</insert>
+
+
+	<update id="update">
+<![CDATA[
+		update
+(select * from tbl_his_mem where h_id = (select * from
+(select h_id from tbl_his where target = #{team_vo.applier} and t_id = #{team_vo.t_id} order by 1 desc) where rownum = 1)
+and m_id = #{member_vo.m_id})
+set decision = #{decision}
+]]>
+	</update>
+
+	<!-- 입력 매개변수 state 변경 필요! -->
+	<update id="updateHis">
+		update tbl_his
+		set state = 'Y'
+		where h_id = (select
+		h_id from tbl_his
+		where target = #{m_id}
+		and t_id = #{t_id});
+	</update>
+
+
+	<!-- select을 위한 반환 정의 -->
+	<!-- <resultMap type="org.kakarrot.domain.HistoryVO" id="selectResult"> 
+		<id property="id" column="id" /> <result property="t_name" column="t_name" 
+		/> <result property="target" column="target" /> <result property="result" 
+		column="result" /> <result property="canceled" column="canceled" /> <collection 
+		property="members" ofType="org.kakarrot.domain.HistoryMemberVO"> <result 
+		property="h_id" column="h_id" /> 조인 이후에 결과 값에는 h_id가 없어서 에러 예상 <result property="m_id" 
+		column="m_id" /> <result property="decision" column="decision" /> </collection> 
+		</resultMap> <select id="selectOne" resultMap="selectResult"> SELECT * FROM 
+		tbl_his his, tbl_his_mem mem WHERE his.id = mem.h_id (+) AND his.id = #{id} 
+		</select> <select id="selectList" resultMap="selectResult"> SELECT tb.id, 
+		tb.t_name, tb.p_id, tb.target, tb.create_date, tb.h_id, tb.m_id, tb.decision 
+		FROM( SELECT rownum rn, his.*, mem.* FROM tbl_his his, tbl_his_mem mem WHERE 
+		<include refid="where"/> <![CDATA[ his.id = mem.h_id (+) AND rownum <= #{amount}*#{page} 
+		ORDER BY his.id) tb WHERE tb.rn > #{amount}*(#{page}-1) ]]> </select> <sql 
+		id="where"> <if test=" category == 'target' or category == 'TARGET'"> target 
+		= #{value} AND </if> <if test=" category == 'member' or category == 'MEMBER'"> 
+		m_id = #{value} AND </if> </sql> <update id="update"> HistoryDTO에서 id 값이랑 
+		canceled랑 result만 가져와서 덮음 UPDATE tbl_his SET t_name = #{t_name} p_id = #{p_id} 
+		target = #{target} WHERE id = #{id} </update> <delete id="delete"> key로 들어온 
+		열을 지움 (DB에서 해당 행이 지워지면 FK로 연결되있는 mem의 행도 자동으로 지워지도록) DELETE FROM tbl_his 
+		WHERE id = #{id} </delete> -->
+
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.kakarrot.dao.memberMapper">
+	<insert id="insert">
+		insert into tbl_mem(m_id,pw,name)
+		values(#{m_id},#{pw},#{name}) 
+	</insert>
+
+	<select id="selectOne" resultType="org.kakarrot.domain.MemberVO">
+		<!-- key값으로 MemberVO -->
+		select * from tbl_mem
+		where m_id=#{m_id}
+	</select>
+
+	<select id="selectAuth" resultType="String">
+		select auth from tbl_team_mem
+		where m_id = #{m_id}
+	</select>
+<!-- 
+	<select id="selectList" resultType="MemberVO"> 나중에 구현(admin영역) </select>
+
+	<update id="update">
+		MemberVO받아와서 거기의 id값으로 찾은 행의 값을 나머지 내부값으로 덮어 씌움
+		UPDATE tbl_mem
+		SET pw=#{pw}, name=#{name}, pic=#{pic}
+		where id=#{id}
+		변경창에는 id비활성화 되어있어야 함.
+		변경창에는 기존 사진이 불러와져 있어야 함.
+	</update>
+
+	<delete id="delete">
+		id값으로 해당 행을 지움
+		delete from tbl_mem
+		where id=#{id}
+	</delete> -->
+
+</mapper>

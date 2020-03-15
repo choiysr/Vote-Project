@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.kakarrot.dao.teamMapper">
+
+	<insert id="insertTeam">
+		insert into
+		tbl_team(t_id,name,max_mem)
+		values(seq_tbl_team_id.nextval,#{name},#{max_mem})
+	</insert>
+
+	<insert id="insertTeamMember">
+		insert into
+		tbl_team_mem(m_id,t_id,auth)
+		values(#{m_id},seq_tbl_team_id.currval,'L')
+	</insert>
+
+	<select id="selectTeamMembers"
+		resultType="org.kakarrot.domain.MemberVO">
+		select * from
+		tbl_team_mem tm, tbl_mem mem
+		where (mem.m_id=tm.m_id)
+		and t_id = #{t_id}
+		order by auth
+	</select>
+
+	<select id="selectTeams" resultType="org.kakarrot.domain.TeamVO">
+		select * from tbl_team
+	</select>
+
+
+	<select id="selectOne"
+		resultType="org.kakarrot.domain.TeamBuildDTO">
+		select * from tbl_team t1, tbl_team_mem t2
+		where t1.t_id =
+		t2.t_id
+		and m_id = #{m_id}
+	</select>
+
+	<select id="select" resultType="org.kakarrot.domain.TeamVO">
+		select * from tbl_team
+		where t_id
+		= #{t_id}
+	</select>
+
+	<update id="updateApp">
+		update tbl_team
+		set applier = #{member_vo.m_id}
+		where t_id = #{team_vo.t_id}
+	</update>
+	
+	<update id="endVote">
+	update tbl_team set applier = '' where t_id = #{t_id}
+	</update>
+	
+	<insert id="insertTeamMem">
+	insert into tbl_team_mem (t_id, m_id) values(#{t_id}, #{applier})
+	</insert>
+	
+	<update id="state">
+		update tbl_team set state = #{state} where t_id = #{t_id}
+	</update>
+	
+	<select id="count" resultType="Integer">
+		select (max_mem - (select count(t_id) from tbl_team_mem where t_id = #{t_id}) ) cnt 
+		from tbl_team where t_id = #{t_id}
+	</select>
+
+	<!-- <select id="selectOne" resultType="TeamVO"> key값으로 TeamVO select * 
+		from tbl_team where name=${name} </select> -->
+
+
+
+	<!--<update id="update"> 팀명은 변경할 수 없음 TeamVO받아와서 거기의 name값으로 찾은 행의 값을 나머지 
+		내부값으로 덮어 씌움 UPDATE tbl_team SET pw=${pw}, name=${name}, pic=${pic} where 
+		id=${id} 변경창에는 id비활성화 되어있어야 함. 변경창에는 기존 사진이 불러와져 있어야 함. </update> <delete 
+		id="delete"> id값으로 해당 행을 지움 delete from tbl_member where id=${id} </delete> -->
+
+</mapper>
